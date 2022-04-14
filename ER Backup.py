@@ -2,6 +2,7 @@
 
 
 from importlib.resources import path
+import sys
 import tkinter as tk
 from tkinter import *
 import time
@@ -12,8 +13,8 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import showinfo
 from os import path
 
-
-
+currentpath= (os.path.dirname(sys.argv[0]))
+settingsfile= currentpath+'\settings.txt'
 defaultpath = (os.path.expanduser('~')) + '\Appdata\Roaming\EldenRing'
 
 
@@ -26,13 +27,13 @@ defaultpath = (os.path.expanduser('~')) + '\Appdata\Roaming\EldenRing'
 #exit()
 
 #directory settings:
-if path.exists('\settings.txt') == False:
-    with open ("\settings.txt", "w") as settings:
+if path.exists(settingsfile) == False:
+    with open (settingsfile, "w") as settings:
         settings.write('\n\n')
         erpath = ''
         destpath = ''
 else:
-    with open ('\settings.txt', 'r') as settings:
+    with open (settingsfile, 'r') as settings:
         data= settings.readlines()
         erpath = data[0].replace('\n','')
         destpath = data[1].replace('\n','')
@@ -115,7 +116,7 @@ def backupSaveFile():
     destination = destination_box.get()
     print(origin, destination)
     boton_label.config(text= 'Done!')
-    with open ('\settings.txt', "w") as settings:
+    with open (settingsfile, "w") as settings:
         settings.write(f"{origin}\n{destination_box.get()}\n")
 
 

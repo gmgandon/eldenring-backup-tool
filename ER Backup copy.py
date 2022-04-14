@@ -2,6 +2,7 @@
 
 
 from importlib.resources import path
+import sys
 import tkinter as tk
 from tkinter import *
 import time
@@ -13,8 +14,6 @@ from tkinter.messagebox import showinfo
 from os import path
 
 
-
-defaultpath = (os.path.expanduser('~')) + '\Appdata\Roaming\EldenRing'
 
 
 #backuppath = r"D:\Juegos\ER backup\ER0000" + (time.asctime().replace(":", "-")) + ".sl2"
@@ -37,6 +36,12 @@ else:
         erpath = data[0].replace('\n','')
         destpath = data[1].replace('\n','')
 
+def savesettings():
+    origin = origin_box.get()
+    destination = destination_box.get()
+    print(origin, destination)
+    with open ('settings.txt', "w") as settings:
+        settings.write(f"{origin}\n{destination}\n")
     
 
 
@@ -47,41 +52,46 @@ else:
 
 
 def getfilename():
-    deftaultname= 'ER0000'
+    defaultname= 'ER0000'
     description = description_box.get()
 
     if description != '' :
-        return description
+        return defaultname + description
     else:
-        return deftaultname + (time.asctime().replace(":", "-"))
+        return defaultname + (time.asctime().replace(":", "-"))
 
 def setts():
+    global destination_box, origin_box
+
     settingswindow = Toplevel()
     settingswindow.title('Settings')
     settingswindow.geometry('300x200')
 
     #box y boton origen
     origin_label= tk.Label(settingswindow, text='Save file:')
-    origin_label.place(x=20, y=70)
+    origin_label.place(x=20, y=10)
 
     origin_box= ttk.Entry(settingswindow)
-    origin_box.place(x=20, y=100, width=200)
+    origin_box.place(x=20, y=40, width=200)
     origin_box.insert(0, origindir())
 
     botonorigin = ttk.Button(settingswindow, text="...", command=save_file)
-    botonorigin.place(x= 250, y= 98, width=25)
+    botonorigin.place(x= 250, y= 38, width=25)
 
 
     #destino
     destination_label = tk.Label(settingswindow, text='backup location')
-    destination_label.place(x=20, y=130)
+    destination_label.place(x=20, y=70)
 
     destination_box= ttk.Entry(settingswindow)
-    destination_box.place(x=20, y=160, width=200)
+    destination_box.place(x=20, y=90, width=200)
     destination_box.insert(0, destinationdir())
 
     botondestination = ttk.Button(settingswindow, text="...", command=backup_file)
-    botondestination.place(x= 250, y= 158, width=25)
+    botondestination.place(x= 250, y= 88, width=25)
+
+    botonsave = ttk.Button(settingswindow, text='Save settings', command=savesettings)
+    botonsave.place(x=180, y=150, width=50)
 
     
 def origindir():
@@ -92,7 +102,7 @@ def origindir():
 
 def destinationdir():
     if destpath == '':
-        return '/'
+        return ''
     else:
         return destpath
 
@@ -110,7 +120,8 @@ def save_file():
         title='Selected file',
         message=filename
     )
-
+    origin_box.delete(0, END)
+    origin_box.insert(0, filename)
 
 def backup_file():
     filename = asksaveasfilename(
@@ -125,16 +136,22 @@ def backup_file():
         title='Selected file',
         message=filename
     )    
-
+    destination_box.delete(0, END)
+    destination_box.insert(0, filename)
 
 def backupSaveFile():
-    origin = save_file
-    destination = backup_file
+    origin = origin_box.get()
+    destination = destination_box.get()
     print(origin, destination)
     boton_label.config(text= 'Done!')
     with open ('settings.txt', "w") as settings:
         settings.write(f"{origin}\n{destination}\n")
 
+
+#path info
+currentpath= (os.path.dirname(sys.argv[0]))
+settingsfile= currentpath+'\settings.txt'
+defaultpath = (os.path.expanduser('~')) + '\Appdata\Roaming\EldenRing'
 
 #datos de la ventana
 root= tk.Tk()
