@@ -1,7 +1,9 @@
 
-
-
+from difflib import restore
 from importlib.resources import path
+from logging import exception
+from ntpath import join
+from optparse import Values
 import sys
 import tkinter as tk
 from tkinter import *
@@ -11,7 +13,8 @@ import shutil
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import showinfo
-from os import path
+from os import listdir, path
+from turtle import update
 
 
 
@@ -97,7 +100,6 @@ def pathCheck(origin, destination):
 
 
 def nameCheck(description, destination):
-
     if description != '':
         return(destination[:-4])+" "+(description_box.get())+(destination[-4:])
     else:
@@ -107,7 +109,6 @@ def backupSaveFile():
     origin = origin_box.get()
     destination = destination_box.get()
     description = description_box.get()
-    
     actualdestination = nameCheck(description, destination)
 
     if pathCheck(origin,destination):
@@ -119,6 +120,30 @@ def backupSaveFile():
     else:
         boton_label.config(text= 'Check your settings!')
 
+def restoreSaveFile():
+    origin = origin_box.get()
+    destination = destination_box.get()
+    description = ''
+    actualdestination = nameCheck(description, destination)
+
+    if pathCheck(origin,destination):
+        print(origin, actualdestination)
+        print (description_box.get())
+        boton_label.config(text= 'Done!')
+        with open ('settings.txt', "w") as settings:
+            settings.write(f"{origin}\n{destination}\n")
+    else:
+        boton_label.config(text= 'Check your settings!')
+
+    print(destination, f"{destination}/{combo.get()}")
+
+
+def updateComboList(combo):
+    folder = (destinationdir().split('/'))
+    realfolder = '/'.join(folder[:-1])
+    listedfiles = os.listdir(realfolder)
+    combo['value'] = tuple(listedfiles)
+
 
     
     
@@ -129,10 +154,11 @@ currentpath= (os.path.dirname(sys.argv[0]))
 settingsfile= currentpath+'\settings.txt'
 defaultpath = (os.path.expanduser('~')) + '\Appdata\Roaming\EldenRing'
 
-#datos de la ventana
+#set window
 root= tk.Tk()
 root.title("Elden Ring Backup tool")
 root.iconbitmap(currentpath+'\icon.ico')
+root.resizable(False, False)
 
 #set notebook
 tabcontrol = ttk.Notebook(root, height=200, width=300)
@@ -140,8 +166,10 @@ tabcontrol = ttk.Notebook(root, height=200, width=300)
 #set tabs
 tab1 = ttk.Frame(tabcontrol)
 tab2 = ttk.Frame(tabcontrol)
+tab3 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab1, text='Back up')
 tabcontrol.add(tab2, text='Settings')
+tabcontrol.add(tab3, text='Restore')
 tabcontrol.pack(expand=1, fill="both")
 
 
@@ -154,18 +182,12 @@ description_label.place(x=20, y=10)
 description_box= ttk.Entry(tab1)
 description_box.place(x=20, y=40, width=200)
 
-
-    
-
-
 #boton
 boton_label = tk.Label(tab1, text=' ')
 boton_label.place(x=117, y= 130)
 
 boton = ttk.Button(tab1, text="Backup now", command=backupSaveFile)
 boton.place(x= 100, y= 100)
-
-
 
 #origin
 origin_label= tk.Label(tab2, text='Save file:')
@@ -177,7 +199,6 @@ origin_box.insert(0, origindir())
 
 botonorigin = ttk.Button(tab2, text="...", command=save_file)
 botonorigin.place(x= 250, y= 38, width=25)
-
 
 #destino
 destination_label = tk.Label(tab2, text='backup location')
@@ -193,6 +214,20 @@ botondestination.place(x= 250, y= 88, width=25)
 botonsave = ttk.Button(tab2, text='Save settings', command=savesettings)
 botonsave.place(x=100, y=150, width=80)
 
+#set file selection
+selected_file = tk.StringVar()
+selected_file.set('Select a save to restore')
+combo = ttk.Combobox(tab3, width=100, height=150, state='readonly', textvariable= selected_file)
+combo.place(x=20, y=40, width=200)
+try:
+    updateComboList(combo)
+except:
+    pass
+restorebutton = ttk.Button(tab3, text= 'Restore this save', command= restoreSaveFile)
+restorebutton.place(x= 90, y= 100)
+
+restore_label = tk.Label(tab3, text=' ')
+restore_label.place(x=117, y= 130)
 
 
 
